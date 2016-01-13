@@ -25,6 +25,6 @@ class Scanner
   string scan_id();
   string scan_string(char chary);
   void recognize_ids(string token_name, int line_number);
-  queue <Token>scan_file(queue<char> char_queue_to_scan);
+  queue <Token>scan_file();
   void check_token_list(queue<Token>token_queue);
 };

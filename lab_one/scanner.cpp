@@ -92,35 +92,41 @@ void Scanner::recognize_tokens()
       {
         Token token = Token("COMMA", ",", line_number);
         token_list.push(token);
+		char_queue.pop();
         break;
       }
       case '+':
       {
         line_number++;
+		char_queue.pop();
         break;
       }
       case '.':
       {
         Token token = Token("PERIOD", ".", line_number);
         token_list.push(token);
+		char_queue.pop();
         break;
       }
       case '?':
       {
         Token token = Token("Q_MARK", "?", line_number);
         token_list.push(token);
+		char_queue.pop();
         break;
       }
       case '(':
       {
         Token token = Token("LEFT_PAREN", "(", line_number);
         token_list.push(token);
+		char_queue.pop();
         break;
       }
       case ')':
       {
         Token token = Token("RIGHT_PAREN", ")", line_number);
         token_list.push(token);
+		char_queue.pop();
         break;
       }
       case ':':
@@ -129,10 +135,12 @@ void Scanner::recognize_tokens()
         {
           Token token = Token("COLON_DASH", ":-", line_number);
           token_list.push(token);
+		  char_queue.pop();
           break;
         }
         Token token = Token("COLON", ":", line_number);
         token_list.push(token);
+		char_queue.pop();
         break;
       }
       case '\'':
@@ -140,6 +148,7 @@ void Scanner::recognize_tokens()
         string token_string = scan_string(curr_char);
         Token token = Token("STRING", token_string, line_number);
         token_list.push(token);
+		char_queue.pop();
         break;
       }
       default:
@@ -151,15 +160,15 @@ void Scanner::recognize_tokens()
   // switch (curr_char)
 }
 
-queue <Token>Scanner::scan_file(queue<char>char_queue_to_scan)
+queue <Token>Scanner::scan_file()
 {
-  while (!char_queue_to_scan.empty())
+  while (!char_queue.empty())
   {
-    cout << char_queue_to_scan.front();
+    cout << char_queue.front();
     //cout << char_queue_to_scan.front();
     //check_token_list(token_list);
     recognize_tokens();
-    char_queue_to_scan.pop();
+    //char_queue.pop();
   }
   return token_list;
 }
@@ -207,7 +216,7 @@ void Scanner::input_and_prepare_file(string file_name)
     cout << temp_queue.front();
     temp_queue.pop();
   }
-  scan_file(char_queue);
+  scan_file();
   // while (!token_list.empty())
   // {
   //   cout << endl << token_list.front().token_type;

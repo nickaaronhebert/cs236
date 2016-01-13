@@ -12,7 +12,21 @@ Token::~Token()
  
 }
 
-string toString(Token token_to_print)
+string Token::toString(Token token_to_print)
 {
   return "";
+}
+
+string Token::getTokenType()
+{
+	return token_type;
+}
+
+string Token::getTokenValue()
+{
+	return token_value;
+}
+int Token::getLineNumber()
+{
+	return line_number;
 }
