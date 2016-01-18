@@ -13,7 +13,7 @@ int main ()
 {
 	
 	Scanner scanner = Scanner();
-	scanner.input_and_prepare_file("in61.txt");
-  return 0;
+	scanner.print_file(scanner.input_and_prepare_file("in12.txt"), "out61.txt");
+	return 0;
 }
 

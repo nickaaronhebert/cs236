@@ -27,9 +27,15 @@ void Scanner::check_token_list(queue<Token>token_queue)
 
 string Scanner::scan_string(char char_to_add)
 {
-  while (!char_queue.front() == '\'')
+	id_string = "";
+	char_queue.pop();
+  while (char_queue.front() != '\'')
   {
-    id_string+= char_to_add;
+   if (char_queue.front() == '+')
+    {
+	   return "";
+	}
+    id_string+= char_queue.front();
     char_queue.pop();
   }
   return id_string;
@@ -41,7 +47,8 @@ string Scanner::scan_id()
   string id;
   if (isLetter == false)
   {
-    return "An error has occured.";
+	char_queue.pop();
+    return "";
   }
   while (isalnum(char_queue.front()))
   {
@@ -131,6 +138,7 @@ void Scanner::recognize_tokens()
       }
       case ':':
       {
+		char_queue.pop();
         if (char_queue.front() == '-')
         {
           Token token = Token("COLON_DASH", ":-", line_number);
@@ -140,24 +148,39 @@ void Scanner::recognize_tokens()
         }
         Token token = Token("COLON", ":", line_number);
         token_list.push(token);
-		char_queue.pop();
         break;
       }
       case '\'':
       {
         string token_string = scan_string(curr_char);
+		if (token_string == "")
+		{
+			handle_error(char_queue);
+			break;
+		}
         Token token = Token("STRING", token_string, line_number);
         token_list.push(token);
 		char_queue.pop();
         break;
       }
+	  case '%':
+	  {
+		  Token token = Token("EOF", "", line_number);
+		  token_list.push(token);
+		  char_queue.pop();
+		  break;
+	  }
+
       default:
         string token_id = scan_id();
+		if (token_id == "")
+		{
+			handle_error(char_queue);
+			break;
+		}
         recognize_ids(token_id, line_number);
         break;
   }
-  
-  // switch (curr_char)
 }
 
 queue <Token>Scanner::scan_file()
@@ -173,7 +196,7 @@ queue <Token>Scanner::scan_file()
   return token_list;
 }
 
-void Scanner::input_and_prepare_file(string file_name)
+queue<Token> Scanner::input_and_prepare_file(string file_name)
 {
   ifstream myfile (file_name);
   char curr_char;
@@ -185,29 +208,34 @@ void Scanner::input_and_prepare_file(string file_name)
       {
         case '\'':
           char_queue.push(curr_char);
-          while (curr_char != '\'')
+		  myfile.get(curr_char);
+          while (curr_char != '\'' && curr_char != '\n')
           {
             char_queue.push(curr_char);
+			myfile.get(curr_char);
           }
+		  char_queue.push(curr_char);
           break;
         case '#':
           while (curr_char != '\n')
           {
             myfile.get(curr_char);
           }
+		  line_number++;
           break;
         case ' ':
           break;
-          break;
         case '\n':
           char_queue.push('+');
+		  break;
         case '\t':
           break;
         default:
           char_queue.push(curr_char);
           break;
       }
-    }    
+    }
+	char_queue.push('%');
   }
   queue<char>temp_queue;
   temp_queue = char_queue;
@@ -217,35 +245,43 @@ void Scanner::input_and_prepare_file(string file_name)
     temp_queue.pop();
   }
   scan_file();
-  // while (!token_list.empty())
-  // {
-  //   cout << endl << token_list.front().token_type;
-  //   cout << endl << token_list.front().token_value;
-  //   cout << endl << token_list.front().line_number;
-  //   cout <<endl;
-  //   token_list.pop();
-  // }
-  
+ 
+  return token_list;
 }
 
-// COMMA The ',' character ,
-// PERIOD  The '.' character .
-// Q_MARK  The '?' character ?
-// LEFT_PAREN  The '(' character (
-// RIGHT_PAREN The ')' character )
-// COLON The ':' character :
-// COLON_DASH  The string ":-" :-
-// SCHEMES The string "Schemes"  Schemes
-// FACTS The string "Facts"  Facts
-// RULES The string "Rules"  Rules
-// QUERIES The string "Queries"  Queries
-// ID  An identifier is a letter followed by zero or more letters or digits, and is not a keyword (Schemes, Facts, Rules, Queries).  
-// Valid Identifiers Invalid Identifiers
-// Identifier1 1stPerson
-// Person  Schemes
-// STRING  A string is a sequence of characters enclosed in single quotes. White space (space, tab) is not skipped when inside a string. Newlines are not allowed in a string. If the end of line or end of file is found before the end of the string, it is an error.  'This is a string'
-// '' -- (The empty string)
-// EOF The end of the input file.  
+void Scanner::print_file(queue<Token>token_queue, string output_file)
+{
+	int total_tokens = 0;
+	while (!token_queue.empty())
+	{
+		if (token_queue.front().token_type == "ERROR")
+		{
+			final_string += "Input error on line " + to_string(token_queue.front().line_number);
+			ofstream out;
+			out.open(output_file);
+			out << final_string;
+			out.close();
+			return;
+		}
+		total_tokens++;
+		final_string += token_queue.front().toString();
+		token_queue.pop();
+	}
+	ofstream out;
+	out.open(output_file);
+	out << final_string;
+	out.close();
+}
+
+void Scanner::handle_error(queue<char>&char_queue)
+{
+	while (char_queue.empty() == false) { char_queue.pop(); }
+	Token token = Token("ERROR", "", line_number);
+	token_list.push(token);
+
+}
+
+ 
 
 
 

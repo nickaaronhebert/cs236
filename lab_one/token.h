@@ -21,6 +21,7 @@ class Token
 	string getTokenType();
 	string getTokenValue();
     int getLineNumber();
+	string toString();
 
 };
 
